@@ -1,0 +1,633 @@
+openapi: "3.0.3"
+info:
+  title: Ocean POS - API Documentation
+  version: "1.0"
+servers:
+  - url: https://localhost:8080/v1/api
+paths:
+  /users:
+    post:
+      summary: Add new user
+      description: API for Add new user to the system
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        "201":
+          description: Success add new user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 201
+                  message:
+                    type: string
+                    example: success add new user
+                  data:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyEmail:
+                  summary: Empty email
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: email can't be empty
+                emptyPassword:
+                  summary: Empty password
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: password can't be empty
+                emptyName:
+                  summary: Empty name
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: name can't be empty
+                emptyPhoneNumber:
+                  summary: Empty phone number
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: phone number can't be empty
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate user email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              examples:
+                duplicateEmail:
+                  summary: Duplicate email
+                  value:
+                    code: 409
+                    status: CONFLICT
+                    description: email already used
+                duplicatePhone:
+                  summary: Duplicate phone number
+                  value:
+                    code: 409
+                    status: CONFLICT
+                    description: phone number already useds
+    get:
+      summary: Get user lists
+      description: API for get user lists
+      tags:
+        - "User"
+      responses:
+        "200":
+          description: Success get user lists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetUserList"
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+  /users/{userId}:
+    put:
+      summary: Change user data
+      description: API for change user data
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success update user data
+                  data:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              example:
+                code: 400
+                status: BAD_REQUEST
+                description: name can't be empty
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+  /users/{userId}/email:
+    put:
+      summary: Change email
+      description: API for change user email
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateEmailRequest"
+      responses:
+        "200":
+          description: Success update email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success update user email
+                  data:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyEmail:
+                  summary: Empty email
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: email can't be empty
+                invalidEmailFormat:
+                  summary: Invalid email format
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: email format is invalid
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate user email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: email already used
+  /users/{userId}/password:
+    put:
+      summary: Change password
+      description: API for change password
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePasswordRequest"
+      responses:
+        "200":
+          description: Success update password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success change password
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyPassword:
+                  summary: Empty password
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: password can't be empty
+                invalidFormat:
+                  summary: Invalid password format
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: password should contain uppercase, lowercase, number and symbol
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+  /users/{userId}/phone:
+    put:
+      summary: Change phone number
+      description: API for change user phone number
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePhoneNumberRequest"
+      responses:
+        "200":
+          description: Success update phone number
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success change phone number
+                  data:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyPassword:
+                  summary: Empty password
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: password can't be empty
+                invalidFormat:
+                  summary: Invalid password format
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: password should contain uppercase, lowercase, number and symbol
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate user email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: email already exists
+  /users/{userId}/email/verify:
+    post:
+      summary: Verify email
+      description: API for verify user email and this is the main verification of the user account
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailOrPhone"
+      responses:
+        "200":
+          description: Success verify email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success verify email
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyEmail:
+                  summary: Invaid OTP
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: otp is invalid
+                emptyPassword:
+                  summary: Expired OTP
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: otp is expired
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate user email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: email already verified
+  /users/{userId}/phone/verify:
+    post:
+      summary: Verify phone number
+      description: API for verify user phone number
+      tags:
+        - "User"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyEmailOrPhone"
+      responses:
+        "200":
+          description: Success verify phone number
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success verify phone number
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyEmail:
+                  summary: Invaid OTP
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: otp is invalid
+                emptyPassword:
+                  summary: Expired OTP
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: otp is expired
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate phone number verification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: phone number already verified
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: dedy@test.com
+        phone_number:
+          type: string
+          example: 6284210485408
+        name:
+          type: string
+          example: Dedy
+        verified_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        deactivated_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700dy
+        updated_by:
+          type: integer
+          example: 1
+    UserList:
+      type: array
+      items:
+        $ref: "#/components/schemas/User"
+    CreateUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dedy@test.com
+        password:
+          type: string
+          example: dedy123*
+        name:
+          type: string
+          example: Dedy
+        phone_number:
+          type: string
+          example: 6284210485408
+    GetUserList:
+      type: object
+      properties:
+        code:
+          type: string
+          example: 200
+        message:
+          type: string
+          example: success get user lists
+        data:
+          $ref: "#/components/schemas/UserList"
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Dedy
+    UpdateEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dedy@test.com
+    UpdatePasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          example: password123*
+    UpdatePhoneNumberRequest:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          example: 6284210485408
+    VerifyEmailOrPhone:
+      type: object
+      properties:
+        otp:
+          type: string
+          example: 123456
+    BadRequestResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        description:
+          type: string
+    NotFoundResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 404
+        status:
+          type: string
+          example: NOT_FOUND
+    DuplicateEntryResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+        status:
+          type: string
+        description:
+          type: string
+    UnauthorizedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 403
+        status:
+          type: string
+          example: UNAUTHORIZED
+    UnauthenticatedResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 401
+        status:
+          type: string
+          example: UNAUTHENTICATED
