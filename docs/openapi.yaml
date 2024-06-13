@@ -5,10 +5,24 @@ info:
 servers:
   - url: https://localhost:8080/v1/api
 paths:
+  /auth:
+    post:
+      summary: Login
+      description: API for Login
+      tags:
+        - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: success
   /users:
     post:
-      summary: Add new user
-      description: API for Add new user to the system
+      summary: Register
+      description: API for register new user
       tags:
         - "User"
       requestBody:
@@ -493,6 +507,15 @@ paths:
                 description: phone number already verified
 components:
   schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dedy@email.com
+        password:
+          type: string
+          example: password123*
     User:
       type: object
       properties:
@@ -508,10 +531,22 @@ components:
         name:
           type: string
           example: Dedy
-        verified_at:
+        is_email_verified:
+          type: boolean
+          example: false
+        email_verified_at:
           type: string
-          example: 2024-01-01T10:00:00+0700
+          example: null
+        is_phone_number_verified:
+          type: boolean
+          example: false
+        phone_number_verified_at:
+          type: string
+          example: null
         deactivated_at:
+          type: string
+          example: null
+        last_login:
           type: string
           example: 2024-01-01T10:00:00+0700
         created_at:
