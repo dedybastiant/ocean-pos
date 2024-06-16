@@ -74,35 +74,18 @@ func (controller *AuthControllerImpl) Logout(c *gin.Context) {
 	response, err := controller.AuthService.Logout(c, accessToken, refreshToken)
 
 	if err != nil {
-		switch err.Error() {
-		case "EMAIL_NOT_FOUND":
-			c.IndentedJSON(http.StatusNotFound,
-				dto.CommonResponse{
-					Code:        http.StatusNotFound,
-					Status:      "NOT_FOUND",
-					Description: "email not registered",
-				})
-		case "INCORRECT_CREDENTIAL":
-			c.IndentedJSON(http.StatusBadRequest,
-				dto.CommonResponse{
-					Code:        http.StatusBadRequest,
-					Status:      "BAD_REQUEST",
-					Description: "incorrect password",
-				})
-		default:
-			c.IndentedJSON(http.StatusInternalServerError,
-				dto.CommonResponse{
-					Code:        http.StatusInternalServerError,
-					Status:      "INTERNAL_SERVER_ERROR",
-					Description: "something went wrong",
-				})
-		}
+		c.IndentedJSON(http.StatusInternalServerError,
+			dto.CommonResponse{
+				Code:        http.StatusInternalServerError,
+				Status:      "INTERNAL_SERVER_ERROR",
+				Description: "something went wrong",
+			})
+		return
 	} else {
 		c.IndentedJSON(http.StatusOK,
 			dto.CommonResponse{
-				Code:   http.StatusOK,
-				Status: "SUCCESS",
-				Data:   response,
+				Code:   response.Code,
+				Status: response.Status,
 			})
 	}
 }
