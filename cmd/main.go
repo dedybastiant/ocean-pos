@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"ocean-pos/config"
 	"ocean-pos/internal/controller"
 	"ocean-pos/internal/middleware"
@@ -13,20 +14,28 @@ import (
 )
 
 func main() {
-	db := config.NewDB()
+	viperConfig, err := config.NewViper()
+	if err != nil {
+		log.Fatalf("Error initializing config: %v", err)
+	}
+
+	db := config.NewDB(viperConfig)
+	rdb := config.NewRdb()
 
 	userRepository := repository.NewUserRepository()
 	userService := service.NewUserService(userRepository, db)
 	userController := controller.NewUserController(userService)
 
-	authService := service.NewAuthService(userRepository, db)
+	authService := service.NewAuthService(userRepository, db, rdb, viperConfig)
 	authController := controller.NewAuthController(authService)
 
-	authMiddleware := middleware.AuthMiddleware()
+	authMiddleware := middleware.AuthMiddleware(rdb, viperConfig)
 
 	r := gin.Default()
+	r.POST("/auth/login", authController.Login)
+	r.POST("/auth/logout", authMiddleware, authController.Logout)
+
 	r.POST("/users", authMiddleware, userController.Register)
-	r.POST("/auth", authController.Login)
 
 	r.Run()
 }
