@@ -1,23 +1,35 @@
 package middleware
 
 import (
+	"context"
 	"net/http"
 	"ocean-pos/internal/dto"
 	"ocean-pos/internal/service"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+	"github.com/spf13/viper"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func AuthMiddleware(rdb *redis.Client, viperConfig *viper.Viper) gin.HandlerFunc {
+	secretKey := viperConfig.GetString("ACCESS_TOKEN_KEY")
+
 	return func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		t := strings.Split(authHeader, " ")
+		exists, _ := rdb.Exists(context.Background(), t[1]).Result()
+
+		if exists == 1 {
+			c.JSON(http.StatusUnauthorized, dto.CommonResponse{Code: http.StatusUnauthorized, Status: "UNAUTHORIZED"})
+			c.Abort()
+			return
+		}
 		if len(t) == 2 {
 			authToken := t[1]
-			_, err := service.VerifyToken(authToken, "$2a$12$MNLqNZYZTTnS2/dvFrmmL..W6vrKSCxNS8BQaAv/jGPg6MJUCGIDm")
+			_, err := service.VerifyToken(authToken, secretKey)
 			if err != nil {
-				c.JSON(http.StatusUnauthorized, dto.CommonResponse{Code: http.StatusUnauthorized, Status: "UNAUTHORIZED", Description: err.Error()})
+				c.JSON(http.StatusUnauthorized, dto.CommonResponse{Code: http.StatusUnauthorized, Status: "UNAUTHORIZED"})
 				c.Abort()
 				return
 			}
