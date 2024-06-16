@@ -4,46 +4,84 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"ocean-pos/internal/dto"
 	"ocean-pos/internal/model"
 	"ocean-pos/internal/repository"
-	"strconv"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
-	Login(ctx context.Context, request dto.AuthRequest) (*dto.AuthResponse, error)
+	Login(ctx context.Context, request dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type AuthServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *sql.DB
+	RDB            *redis.Client
 }
 
-func NewAuthService(repository repository.UserRepository, DB *sql.DB) AuthService {
+func NewAuthService(repository repository.UserRepository, DB *sql.DB, RDB *redis.Client) AuthService {
 	return &AuthServiceImpl{
 		UserRepository: repository,
 		DB:             DB,
+		RDB:            RDB,
 	}
 }
 
-var jwtKey = []byte("$2a$12$MNLqNZYZTTnS2/dvFrmmL..W6vrKSCxNS8BQaAv/jGPg6MJUCGIDm")
+func GenerateAccessToken(user *model.User) (*string, error) {
+	config := viper.New()
+	config.SetConfigFile("config.env")
+	config.AddConfigPath(".")
 
-func GenerateToken(user *model.User) (*dto.AuthResponse, error) {
+	err := config.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	secretKey := config.GetString("ACCESS_TOKEN_KEY")
+
+	var jwtKey = []byte(secretKey)
+
 	accessTokenExpiry := time.Now().Add(15 * time.Minute).Unix()
-	refreshTokenExpiry := time.Now().Add(7 * 24 * time.Hour).Unix()
 
 	accessTokenClaims := &model.AcessTokenClaims{
 		Sub:  int(user.Id),
-		Name: (user.Name),
+		Name: user.Name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: accessTokenExpiry,
 		},
 	}
+
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
+
+	accessTokenString, err := accessToken.SignedString(jwtKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return &accessTokenString, nil
+}
+
+func GenerateRefreshToken(user *model.User) (*string, error) {
+	config := viper.New()
+	config.SetConfigFile("config.env")
+	config.AddConfigPath(".")
+
+	err := config.ReadInConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	secretKey := config.GetString("REFRESH_TOKEN_KEY")
+
+	var jwtKey = []byte(secretKey)
+
+	refreshTokenExpiry := time.Now().Add(7 * 24 * time.Hour).Unix()
 
 	refreshTokenClaims := &model.RefreshTokenClaims{
 		Sub: int(user.Id),
@@ -52,29 +90,18 @@ func GenerateToken(user *model.User) (*dto.AuthResponse, error) {
 		},
 	}
 
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessTokenClaims)
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshTokenClaims)
-
-	accessTokenString, err := accessToken.SignedString(jwtKey)
-	if err != nil {
-		return nil, err
-	}
 
 	refresTokenString, err := refreshToken.SignedString(jwtKey)
 	if err != nil {
 		return nil, err
 	}
 
-	token := &dto.AuthResponse{
-		Token:        accessTokenString,
-		RefreshToken: refresTokenString,
-	}
-
-	return token, nil
+	return &refresTokenString, nil
 }
 
-func VerifyToken(requestToken string, secret string) (string, error) {
-	token, err := jwt.Parse(requestToken, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(jwtToken string, secret string) (*jwt.MapClaims, error) {
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("ERROR")
 		}
@@ -82,25 +109,18 @@ func VerifyToken(requestToken string, secret string) (string, error) {
 	})
 
 	if err != nil {
-		return "", errors.New("PARSING_ERROR")
+		return &jwt.MapClaims{}, errors.New("PARSING_ERROR")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !ok && !token.Valid {
-		return "", errors.New("INVALID_TOKEN")
+		return &jwt.MapClaims{}, errors.New("INVALID_TOKEN")
 	}
-
-	userId, ok := claims["sub"].(float64)
-	if !ok {
-		return "", errors.New("USER_ID_NOT_FOUND")
-	}
-	userIdInt := int(userId)
-
-	return strconv.Itoa(userIdInt), nil
+	return &claims, nil
 }
 
-func (service *AuthServiceImpl) Login(ctx context.Context, request dto.AuthRequest) (*dto.AuthResponse, error) {
+func (service *AuthServiceImpl) Login(ctx context.Context, request dto.LoginRequest) (*dto.LoginResponse, error) {
 	tx, err := service.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -119,14 +139,18 @@ func (service *AuthServiceImpl) Login(ctx context.Context, request dto.AuthReque
 		return nil, err
 	}
 
-	fmt.Println(user.Password, request.Password)
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password))
 	if err != nil {
-		fmt.Println(err)
 		return nil, errors.New("INCORRECT_CREDENTIAL")
 	}
 
-	response, err := GenerateToken(user)
+	accessToken, err := GenerateAccessToken(user)
+	refreshToken, err := GenerateRefreshToken(user)
+
+	response := &dto.LoginResponse{
+		Token:        *accessToken,
+		RefreshToken: *refreshToken,
+	}
 
 	return response, nil
 }
