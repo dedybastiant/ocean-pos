@@ -17,33 +17,27 @@ import (
 
 type AuthService interface {
 	Login(ctx context.Context, request dto.LoginRequest) (*dto.LoginResponse, error)
+	Logout(ctx context.Context, accessToken string, refreshToken string) (*dto.CommonResponse, error)
 }
 
 type AuthServiceImpl struct {
 	UserRepository repository.UserRepository
 	DB             *sql.DB
 	RDB            *redis.Client
+	ViperConfig    *viper.Viper
 }
 
-func NewAuthService(repository repository.UserRepository, DB *sql.DB, RDB *redis.Client) AuthService {
+func NewAuthService(repository repository.UserRepository, DB *sql.DB, RDB *redis.Client, viperConfig *viper.Viper) AuthService {
 	return &AuthServiceImpl{
 		UserRepository: repository,
 		DB:             DB,
 		RDB:            RDB,
+		ViperConfig:    viperConfig,
 	}
 }
 
-func GenerateAccessToken(user *model.User) (*string, error) {
-	config := viper.New()
-	config.SetConfigFile("config.env")
-	config.AddConfigPath(".")
-
-	err := config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	secretKey := config.GetString("ACCESS_TOKEN_KEY")
+func GenerateAccessToken(user *model.User, viperConfig *viper.Viper) (*string, error) {
+	secretKey := viperConfig.GetString("ACCESS_TOKEN_KEY")
 
 	var jwtKey = []byte(secretKey)
 
@@ -67,17 +61,8 @@ func GenerateAccessToken(user *model.User) (*string, error) {
 	return &accessTokenString, nil
 }
 
-func GenerateRefreshToken(user *model.User) (*string, error) {
-	config := viper.New()
-	config.SetConfigFile("config.env")
-	config.AddConfigPath(".")
-
-	err := config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	secretKey := config.GetString("REFRESH_TOKEN_KEY")
+func GenerateRefreshToken(user *model.User, viperConfig *viper.Viper) (*string, error) {
+	secretKey := viperConfig.GetString("REFRESH_TOKEN_KEY")
 
 	var jwtKey = []byte(secretKey)
 
@@ -120,6 +105,16 @@ func VerifyToken(jwtToken string, secret string) (*jwt.MapClaims, error) {
 	return &claims, nil
 }
 
+func BlacklistToken(ctx context.Context, rdb *redis.Client, token string, expirationTimeInMinutes int64) error {
+	expirationDuration := time.Minute * time.Duration(expirationTimeInMinutes)
+
+	err := rdb.SetNX(ctx, token, true, expirationDuration).Err()
+	if err != nil {
+		return errors.New("FAILED_BLACKLIST_ACCOUNT")
+	}
+	return nil
+}
+
 func (service *AuthServiceImpl) Login(ctx context.Context, request dto.LoginRequest) (*dto.LoginResponse, error) {
 	tx, err := service.DB.Begin()
 	if err != nil {
@@ -144,13 +139,31 @@ func (service *AuthServiceImpl) Login(ctx context.Context, request dto.LoginRequ
 		return nil, errors.New("INCORRECT_CREDENTIAL")
 	}
 
-	accessToken, err := GenerateAccessToken(user)
-	refreshToken, err := GenerateRefreshToken(user)
+	accessToken, err := GenerateAccessToken(user, service.ViperConfig)
+	refreshToken, err := GenerateRefreshToken(user, service.ViperConfig)
 
 	response := &dto.LoginResponse{
 		Token:        *accessToken,
 		RefreshToken: *refreshToken,
 	}
 
+	return response, nil
+}
+
+func (service *AuthServiceImpl) Logout(ctx context.Context, accessToken string, refreshToken string) (*dto.CommonResponse, error) {
+	err := BlacklistToken(ctx, service.RDB, accessToken, 5)
+	if err != nil {
+		return &dto.CommonResponse{}, err
+	}
+
+	err = BlacklistToken(ctx, service.RDB, refreshToken, 120)
+	if err != nil {
+		return &dto.CommonResponse{}, err
+	}
+
+	response := &dto.CommonResponse{
+		Code:   200,
+		Status: "success logout",
+	}
 	return response, nil
 }
