@@ -8,16 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewDB() *sql.DB {
-	config := viper.New()
-	config.SetConfigFile("config.env")
-	config.AddConfigPath(".")
-
-	err := config.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
-
+func NewDB(config *viper.Viper) *sql.DB {
 	username := config.GetString("DATABASE_USERNAME")
 	password := config.GetString("DATABASE_PASSWORD")
 	db_url := config.GetString("DATABASE_URL")
