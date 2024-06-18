@@ -8,6 +8,7 @@ import (
 	"ocean-pos/internal/repository"
 	"ocean-pos/internal/service"
 
+	"github.com/go-playground/validator/v10"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +22,15 @@ func main() {
 
 	db := config.NewDB(viperConfig)
 	rdb := config.NewRdb()
+	validate := validator.New()
 
 	userRepository := repository.NewUserRepository()
 	userService := service.NewUserService(userRepository, db)
 	userController := controller.NewUserController(userService)
+
+	businessRepository := repository.NewBusinessRepository()
+	businessService := service.NewBusinessService(businessRepository, db, validate)
+	businessController := controller.NewBusinessController(businessService)
 
 	authService := service.NewAuthService(userRepository, db, rdb, viperConfig)
 	authController := controller.NewAuthController(authService)
@@ -37,6 +43,8 @@ func main() {
 
 	r.POST("/users", userController.Register)
 	r.GET("/users/:userId", authMiddleware, userController.FindUserById)
+
+	r.POST("/businesses", authMiddleware, businessController.RegisterBusiness)
 
 	r.Run()
 }
