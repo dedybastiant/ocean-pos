@@ -590,6 +590,82 @@ paths:
                 code: 409
                 status: CONFLICT
                 description: phone number already verified
+  /businesses:
+    post:
+      summary: Register new business
+      description: API for register new business
+      tags:
+        - Business
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBusinessRequest"
+      responses:
+        "201":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success register new business
+                  data:
+                    $ref: "#/components/schemas/Business"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyEmail:
+                  summary: Empty name
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: "validation error: Name is required"
+                emptyPhoneNumber:
+                  summary: Empty phone number
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: "validation error: PhoneNumber is required"
+                emptyName:
+                  summary: Empty email
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: "validation error: Email is required"
+                invalidPhoneNumberFormat:
+                  summary: Invalid Phone Number
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: "validation error: PhoneNumber must be at least 11 characters long"
+                invalidEmailFormat:
+                  summary: Invalid Email Address
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: "validation error: Email must be a valid email address"
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
 components:
   schemas:
     LoginRequest:
@@ -706,6 +782,48 @@ components:
         otp:
           type: string
           example: 123456
+    Business:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        owner_user_id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: dedy@business.com
+        name:
+          type: string
+          example: BusinessKu
+        verified_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        deactivated_at:
+          type: string
+          example: null
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700dy
+        updated_by:
+          type: integer
+          example: 1
+    CreateBusinessRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: dedy@business.com
+        name:
+          type: string
+          example: BusinessKu
     BadRequestResponse:
       type: object
       properties:
