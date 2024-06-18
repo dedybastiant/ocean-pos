@@ -15,6 +15,7 @@ import (
 
 type UserService interface {
 	Register(ctx context.Context, request dto.UserRequest) (*dto.UserResponse, error)
+	FindUserById(ctx context.Context, userId string) (*dto.UserResponse, error)
 }
 
 type UserServiceImpl struct {
@@ -93,5 +94,22 @@ func (service *UserServiceImpl) Register(ctx context.Context, request dto.UserRe
 	}
 
 	tx.Commit()
+	return dto.GenerateUserResponse(user), nil
+}
+
+func (service *UserServiceImpl) FindUserById(ctx context.Context, userId string) (*dto.UserResponse, error) {
+	tx, err := service.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := service.UserRepository.FindById(ctx, tx, userId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("ID_NOT_FOUND")
+		}
+		return nil, err
+	}
+
 	return dto.GenerateUserResponse(user), nil
 }

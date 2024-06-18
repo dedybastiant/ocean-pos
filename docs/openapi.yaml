@@ -181,12 +181,69 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorizedResponse"
+    get:
+      summary: Get user by id
+      description: API for get user by id
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: Success get user data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: success update user email
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundResponse"
+              example:
+                code: 404
+                status: NOT_FOUND
+                description: user not found
   /users/{userId}/email:
     put:
       summary: Change email
       description: API for change user email
       tags:
         - "User"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         content:
           application/json:
@@ -255,6 +312,13 @@ paths:
       description: API for change password
       tags:
         - "User"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         content:
           application/json:
@@ -311,6 +375,13 @@ paths:
       description: API for change user phone number
       tags:
         - "User"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         content:
           application/json:
@@ -379,6 +450,13 @@ paths:
       description: API for verify user email and this is the main verification of the user account
       tags:
         - "User"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         content:
           application/json:
@@ -445,6 +523,13 @@ paths:
       description: API for verify user phone number
       tags:
         - "User"
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
       requestBody:
         content:
           application/json:
@@ -639,6 +724,9 @@ components:
         status:
           type: string
           example: NOT_FOUND
+        description:
+          type: string
+          example: user not found
     DuplicateEntryResponse:
       type: object
       properties:

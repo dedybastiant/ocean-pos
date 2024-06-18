@@ -10,6 +10,7 @@ import (
 
 type UserController interface {
 	Register(c *gin.Context)
+	FindUserById(c *gin.Context)
 }
 
 type UserControllerImpl struct {
@@ -56,6 +57,40 @@ func (controller *UserControllerImpl) Register(c *gin.Context) {
 			dto.CommonResponse{
 				Code:   http.StatusCreated,
 				Status: "SUCCESS",
+				Data:   response,
+			})
+	}
+}
+
+func (controller *UserControllerImpl) FindUserById(c *gin.Context) {
+	userId, ok := c.Params.Get("userId")
+	if !ok {
+		return
+	}
+
+	response, err := controller.UserService.FindUserById(c, userId)
+	if err != nil {
+		switch err.Error() {
+		case "ID_NOT_FOUND":
+			c.IndentedJSON(http.StatusNotFound,
+				dto.CommonResponse{
+					Code:        http.StatusNotFound,
+					Status:      "NOT_FOUND",
+					Description: "user not found",
+				})
+		default:
+			c.IndentedJSON(http.StatusInternalServerError,
+				dto.CommonResponse{
+					Code:        http.StatusInternalServerError,
+					Status:      "INTERNAL_SERVER_ERROR",
+					Description: "something went wrong",
+				})
+		}
+	} else {
+		c.IndentedJSON(http.StatusOK,
+			dto.CommonResponse{
+				Code:   http.StatusOK,
+				Status: "success get user data",
 				Data:   response,
 			})
 	}

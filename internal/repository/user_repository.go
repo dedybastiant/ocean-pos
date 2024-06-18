@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"ocean-pos/internal/model"
 )
 
@@ -10,6 +11,7 @@ type UserRepository interface {
 	Insert(ctx context.Context, tx *sql.Tx, user model.User) (*model.User, error)
 	FindByEmail(ctx context.Context, tx *sql.Tx, email string) (*model.User, error)
 	FindByPhoneNumber(ctx context.Context, tx *sql.Tx, phoneNumber string) (*model.User, error)
+	FindById(ctx context.Context, tx *sql.Tx, userId string) (*model.User, error)
 }
 
 type UserRepositoryImpl struct{}
@@ -44,6 +46,7 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 	}
 	defer rows.Close()
 
+	fmt.Println(rows)
 	if rows.Next() {
 		rows.Scan(
 			&user.Id,
@@ -70,8 +73,40 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 
 func (repository *UserRepositoryImpl) FindByPhoneNumber(ctx context.Context, tx *sql.Tx, phoneNumber string) (*model.User, error) {
 	user := model.User{}
-	SQL := "SELECT id,email,password,name,phone_number,is_email_verified,email_verified_at,is_phone_number_verified,phone_number_verified_at,deactivated_at,last_login,created_at,created_by,updated_at,updated_by FROM user WHERE phone_number = ?"
+	SQL := "SELECT id,email,name,phone_number,is_email_verified,email_verified_at,is_phone_number_verified,phone_number_verified_at,deactivated_at,last_login,created_at,created_by,updated_at,updated_by FROM user WHERE phone_number = ?"
 	rows, err := tx.QueryContext(ctx, SQL, phoneNumber)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		rows.Scan(
+			&user.Id,
+			&user.Email,
+			&user.Name,
+			&user.PhoneNumber,
+			&user.IsEmailVerified,
+			&user.EmailVerifiedAt,
+			&user.IsPhoneNumberVerified,
+			&user.PhoneNumberVerifiedAt,
+			&user.DeactivatedAt,
+			&user.LastLogin,
+			&user.CreatedAt,
+			&user.CreatedBy,
+			&user.UpdatedAt,
+			&user.UpdatedBy,
+		)
+		return &user, nil
+	} else {
+		return nil, sql.ErrNoRows
+	}
+}
+
+func (repository *UserRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, userId string) (*model.User, error) {
+	user := model.User{}
+	SQL := "SELECT id, email, name, phone_number, is_email_verified, email_verified_at, is_phone_number_verified, phone_number_verified_at, deactivated_at, last_login, created_at, created_by, updated_at, updated_by FROM user WHERE id = ?"
+	rows, err := tx.QueryContext(ctx, SQL, userId)
 	if err != nil {
 		return nil, err
 	}

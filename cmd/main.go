@@ -35,7 +35,8 @@ func main() {
 	r.POST("/auth/login", authController.Login)
 	r.POST("/auth/logout", authMiddleware, authController.Logout)
 
-	r.POST("/users", authMiddleware, userController.Register)
+	r.POST("/users", userController.Register)
+	r.GET("/users/:userId", authMiddleware, userController.FindUserById)
 
 	r.Run()
 }
