@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"ocean-pos/internal/model"
 )
 
@@ -46,7 +45,6 @@ func (repository *UserRepositoryImpl) FindByEmail(ctx context.Context, tx *sql.T
 	}
 	defer rows.Close()
 
-	fmt.Println(rows)
 	if rows.Next() {
 		rows.Scan(
 			&user.Id,
