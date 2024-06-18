@@ -3,7 +3,7 @@ package dto
 type CommonResponse struct {
 	Code        int         `json:"code"`
 	Status      string      `json:"status"`
-	Description string      `json:"description,omitempty"`
+	Description interface{} `json:"description,omitempty"`
 	Data        interface{} `json:"data,omitempty"`
 	Pagination  *Pagination `json:"pagination,omitempty"`
 }
