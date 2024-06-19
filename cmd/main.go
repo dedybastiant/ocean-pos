@@ -45,6 +45,7 @@ func main() {
 	r.GET("/users/:userId", authMiddleware, userController.FindUserById)
 
 	r.POST("/businesses", authMiddleware, businessController.RegisterBusiness)
+	r.GET("/businesses/:businessId", authMiddleware, businessController.GetBusinessById)
 
 	r.Run()
 }
