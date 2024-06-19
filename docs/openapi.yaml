@@ -666,6 +666,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnauthorizedResponse"
+  /business/{businessId}:
+    get:
+      summary: Get business by id
+      description: API for get business by id
+      tags:
+        - Business
+      parameters:
+        - in: path
+          name: businessId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success get business by id
+                  data:
+                    $ref: "#/components/schemas/Business"
 components:
   schemas:
     LoginRequest:
