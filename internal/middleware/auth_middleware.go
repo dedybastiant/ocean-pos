@@ -33,13 +33,17 @@ func AuthMiddleware(rdb *redis.Client, viperConfig *viper.Viper) gin.HandlerFunc
 		}
 		if len(t) == 2 {
 			authToken := t[1]
-			_, err := service.VerifyToken(authToken, secretKey)
+			claims, err := service.VerifyToken(authToken, secretKey)
 			if err != nil {
 				c.JSON(http.StatusUnauthorized, dto.CommonResponse{Code: http.StatusUnauthorized, Status: "UNAUTHORIZED"})
 				c.Abort()
 				return
 			}
-			c.Set("x-user-id", 1)
+
+			sub := (*claims)["sub"].(float64)
+			userId := int(sub)
+
+			c.Set("x-user-id", userId)
 			c.Next()
 			return
 		}
