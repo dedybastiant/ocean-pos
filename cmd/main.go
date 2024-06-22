@@ -32,6 +32,10 @@ func main() {
 	businessService := service.NewBusinessService(businessRepository, db, validate)
 	businessController := controller.NewBusinessController(businessService)
 
+	storeRepository := repository.NewStoreRepository()
+	storeService := service.NewStoreService(storeRepository, businessRepository, db, validate)
+	storeController := controller.NewStoreController(storeService)
+
 	authService := service.NewAuthService(userRepository, db, rdb, viperConfig)
 	authController := controller.NewAuthController(authService)
 
@@ -46,6 +50,8 @@ func main() {
 
 	r.POST("/businesses", authMiddleware, businessController.RegisterBusiness)
 	r.GET("/businesses/:businessId", authMiddleware, businessController.GetBusinessById)
+
+	r.POST("/stores", authMiddleware, storeController.RegisterStore)
 
 	r.Run()
 }
