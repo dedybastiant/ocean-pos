@@ -695,6 +695,33 @@ paths:
                     example: success get business by id
                   data:
                     $ref: "#/components/schemas/Business"
+  /store:
+    post:
+      summary: Register new Store
+      description: API for register a new store
+      tags:
+        - Store
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterStoreRequest"
+      responses:
+        "201":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success register new business
+                  data:
+                    $ref: "#/components/schemas/Business"
 components:
   schemas:
     LoginRequest:
@@ -853,6 +880,54 @@ components:
         name:
           type: string
           example: BusinessKu
+    Store:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        business_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: BusinessKu - Central Park
+        location:
+          type: string
+          example: Mall Central Park
+        description:
+          type: string
+          example: Lalala yeyueye
+        deactivated_at:
+          type: string
+          example: null
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700dy
+        updated_by:
+          type: integer
+          example: 1
+    RegisterStoreRequest:
+          type: object
+          properties:
+            business_id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: BusinessKu - Central Park
+            location:
+              type: string
+              example: Mall Central Park
+            description:
+              type: string
+              example: Lalala yeyueye
     BadRequestResponse:
       type: object
       properties:
