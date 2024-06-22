@@ -36,6 +36,10 @@ func main() {
 	storeService := service.NewStoreService(storeRepository, businessRepository, db, validate)
 	storeController := controller.NewStoreController(storeService)
 
+	categoryRepository := repository.NewCategoryRepository()
+	categoryService := service.NewCategoryService(categoryRepository, businessRepository, db, validate)
+	categoryController := controller.NewCategoryController(categoryService)
+
 	authService := service.NewAuthService(userRepository, db, rdb, viperConfig)
 	authController := controller.NewAuthController(authService)
 
@@ -52,6 +56,8 @@ func main() {
 	r.GET("/businesses/:businessId", authMiddleware, businessController.GetBusinessById)
 
 	r.POST("/stores", authMiddleware, storeController.RegisterStore)
+
+	r.POST("/categories", authMiddleware, categoryController.CreateCategory)
 
 	r.Run()
 }
