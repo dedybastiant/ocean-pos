@@ -722,6 +722,74 @@ paths:
                     example: success register new business
                   data:
                     $ref: "#/components/schemas/Business"
+  /categories:
+    post:
+      summary: Create New Category
+      description: API for Create New Category
+      tags:
+        - Category
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        "201":
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success create new category
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyName:
+                  summary: Empty name
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: name can't be empty
+                emptyBusinessId:
+                  summary: Empty business id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: business id can't be empty
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate category name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: category already exsist
 components:
   schemas:
     LoginRequest:
@@ -774,7 +842,7 @@ components:
           example: 1
         updated_at:
           type: string
-          example: De2024-01-01T10:00:00+0700dy
+          example: De2024-01-01T10:00:00+0700
         updated_by:
           type: integer
           example: 1
@@ -867,7 +935,7 @@ components:
           example: 1
         updated_at:
           type: string
-          example: De2024-01-01T10:00:00+0700dy
+          example: De2024-01-01T10:00:00+0700
         updated_by:
           type: integer
           example: 1
@@ -909,25 +977,61 @@ components:
           example: 1
         updated_at:
           type: string
-          example: De2024-01-01T10:00:00+0700dy
+          example: De2024-01-01T10:00:00+0700
         updated_by:
           type: integer
           example: 1
     RegisterStoreRequest:
-          type: object
-          properties:
-            business_id:
-              type: integer
-              example: 1
-            name:
-              type: string
-              example: BusinessKu - Central Park
-            location:
-              type: string
-              example: Mall Central Park
-            description:
-              type: string
-              example: Lalala yeyueye
+      type: object
+      properties:
+        business_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: BusinessKu - Central Park
+        location:
+          type: string
+          example: Mall Central Park
+        description:
+          type: string
+          example: Lalala yeyueye
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        business_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Pizza
+        deactivated_at:
+          type: string
+          example: null
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700
+        updated_by:
+          type: integer
+          example: 1
+    CreateCategoryRequest:
+      type: object
+      properties:
+        business_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Pizza
     BadRequestResponse:
       type: object
       properties:
@@ -966,7 +1070,7 @@ components:
           example: 403
         status:
           type: string
-          example: UNAUTHORIZED
+          example: FORBIDDEN
     UnauthenticatedResponse:
       type: object
       properties:
