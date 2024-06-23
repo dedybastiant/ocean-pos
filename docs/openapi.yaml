@@ -790,6 +790,86 @@ paths:
                 code: 409
                 status: CONFLICT
                 description: category already exsist
+  /menus:
+    post:
+      summary: Add new menu
+      description: API for add new menu to category
+      tags:
+        - Menu
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMenuRequest"
+      responses:
+        "201":
+          description: success add new menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success add new menu
+                  data:
+                    $ref: "#/components/schemas/Menu"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyBusinessId:
+                  summary: Empty business id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: business id can't be empty
+                emptyCategoryId:
+                  summary: Empty category id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: category id can't be empty
+                emptyName:
+                  summary: Empty name
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: name can't be empty
+                emptyPrice:
+                  summary: Empty price
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: price can't be empty
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate category name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: menu already exsist
 components:
   schemas:
     LoginRequest:
@@ -1032,6 +1112,51 @@ components:
         name:
           type: string
           example: Pizza
+    Menu:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        category_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Pizza Meat Lover
+        default_price:
+          type: integer
+          example: 50000
+        deactivated_at:
+          type: string
+          example: null
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700
+        updated_by:
+          type: integer
+          example: 1
+    CreateMenuRequest:
+      type: object
+      properties:
+        business_id:
+          type: integer
+          example: 1
+        category_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Pizza Meat Lover
+        price:
+          type: integer
+          example: 50000
     BadRequestResponse:
       type: object
       properties:
