@@ -9,6 +9,7 @@ import (
 type CategoryRespository interface {
 	InsertCategory(ctx context.Context, tx *sql.Tx, category model.Category) (*model.Category, error)
 	FindCategoryByName(ctx context.Context, tx *sql.Tx, categoryName string) (*model.Category, error)
+	FindCategoryById(ctx context.Context, tx *sql.Tx, categoryId int) (*model.Category, error)
 }
 
 type CategoryRespositoryImpl struct{}
@@ -39,6 +40,33 @@ func (repository *CategoryRespositoryImpl) FindCategoryByName(ctx context.Contex
 	if err != nil {
 		return nil, err
 	}
+
+	category := &model.Category{}
+
+	if rows.Next() {
+		rows.Scan(
+			&category.Id,
+			&category.BusinessId,
+			&category.Name,
+			&category.DeactivatedAt,
+			&category.CreatedAt,
+			&category.CreatedBy,
+			&category.UpdatedAt,
+			&category.UpdatedBy,
+		)
+		return category, nil
+	} else {
+		return nil, sql.ErrNoRows
+	}
+}
+
+func (repository *CategoryRespositoryImpl) FindCategoryById(ctx context.Context, tx *sql.Tx, categoryId int) (*model.Category, error) {
+	SQL := "SELECT id, business_id, name, deactivated_at, created_at, created_by, updated_at, updated_by  FROM category c WHERE id = ?"
+	rows, err := tx.QueryContext(ctx, SQL, categoryId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	category := &model.Category{}
 
