@@ -67,7 +67,7 @@ func (controller *CategoryControllerImpl) CreateCategory(c *gin.Context) {
 				dto.CommonResponse{
 					Code:        http.StatusConflict,
 					Status:      "ERROR_DUPLICATE",
-					Description: "caterogy already exsist",
+					Description: "caterogy already exist",
 				})
 			return
 		}

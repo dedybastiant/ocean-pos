@@ -82,8 +82,8 @@ func (service *MenuServiceImpl) AddNewMenu(ctx context.Context, request dto.AddM
 		return nil, errors.New("FORBIDDEN")
 	}
 
-	exsistMenu, err := service.MenuRepository.FindMenuByName(ctx, tx, menuName)
-	if exsistMenu != nil {
+	existMenu, err := service.MenuRepository.FindMenuByName(ctx, tx, menuName)
+	if existMenu != nil {
 		return nil, errors.New("DUPLICATE_MENU")
 	}
 

@@ -789,7 +789,7 @@ paths:
               example:
                 code: 409
                 status: CONFLICT
-                description: category already exsist
+                description: category already exists
   /menus:
     post:
       summary: Add new menu
@@ -869,7 +869,7 @@ paths:
               example:
                 code: 409
                 status: CONFLICT
-                description: menu already exsist
+                description: menu already exists
 components:
   schemas:
     LoginRequest:
