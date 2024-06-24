@@ -44,6 +44,10 @@ func main() {
 	menuService := service.NewMenuService(menuRepository, businessRepository, categoryRepository, db, validate)
 	menuController := controller.NewMenuController(menuService)
 
+	storeMenuRepository := repository.NewStoreMenuRepository()
+	storeMenuService := service.NewStoreMenuService(storeMenuRepository, businessRepository, storeRepository, categoryRepository, menuRepository, db, validate)
+	storeMenuController := controller.NewStoreMenuController(storeMenuService)
+
 	authService := service.NewAuthService(userRepository, db, rdb, viperConfig)
 	authController := controller.NewAuthController(authService)
 
@@ -64,6 +68,8 @@ func main() {
 	r.POST("/categories", authMiddleware, categoryController.CreateCategory)
 
 	r.POST("/menus", authMiddleware, menuController.AddNewMenu)
+
+	r.POST("/store-menus", authMiddleware, storeMenuController.AddNewStoreMenu)
 
 	r.Run()
 }
