@@ -870,6 +870,98 @@ paths:
                 code: 409
                 status: CONFLICT
                 description: menu already exists
+  /store-menus:
+    post:
+      summary: Add new store menu
+      description: API for add new store menu
+      tags:
+        - Store Menu
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStoreMenuRequest"
+      responses:
+        "201":
+          description: success add new store menu
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: 201
+                  status:
+                    type: string
+                    example: success add new store menu
+                  data:
+                    $ref: "#/components/schemas/StoreMenu"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BadRequestResponse"
+              examples:
+                emptyBusinessId:
+                  summary: Empty business id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: business id can't be empty
+                emptyCategoryId:
+                  summary: Empty category id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: category id can't be empty
+                emptyStoreId:
+                  summary: Empty store id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: store id can't be empty
+                emptyMenuId:
+                  summary: Empty menu id
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: menu id can't be empty
+                emptyStorePrice:
+                  summary: Empty store price
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: store price can't be empty
+                emptyIsAvailable:
+                  summary: Empty price
+                  value:
+                    code: 400
+                    status: BAD_REQUEST
+                    description: is available can't be empty
+        "401":
+          description: Invalid credential
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedResponse"
+        "403":
+          description: No Permission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedResponse"
+        "409":
+          description: Duplicate store menu
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DuplicateEntryResponse"
+              example:
+                code: 409
+                status: CONFLICT
+                description: store menu already exists
 components:
   schemas:
     LoginRequest:
@@ -1157,6 +1249,60 @@ components:
         price:
           type: integer
           example: 50000
+    StoreMenu:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        store_id:
+          type: integer
+          example: 1
+        menu_id:
+          type: integer
+          example: 1
+        store_price:
+          type: integer
+          example: 51000
+        is_available:
+          type: integer
+          example: 1
+        deactivated_at:
+          type: integer
+          example: null
+        created_at:
+          type: string
+          example: 2024-01-01T10:00:00+0700
+        created_by:
+          type: integer
+          example: 1
+        updated_at:
+          type: string
+          example: De2024-01-01T10:00:00+0700
+        updated_by:
+          type: integer
+          example: 1
+    CreateStoreMenuRequest:
+      type: object
+      properties:
+        business_id:
+          type: integer
+          example: 1
+        store_id:
+          type: integer
+          example: 1
+        category_id:
+          type: integer
+          example: 1
+        menu_id:
+          type: integer
+          example: 1
+        store_price:
+          type: integer
+          example: 51000
+        is_available:
+          type: boolean
+          example: true
     BadRequestResponse:
       type: object
       properties:
