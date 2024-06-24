@@ -80,5 +80,6 @@ func (service *StoreServiceImpl) RegisterStore(ctx context.Context, request dto.
 		return nil, err
 	}
 
+	tx.Commit()
 	return dto.GenerateRegisterStoreResponse(store), nil
 }
